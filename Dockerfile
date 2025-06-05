@@ -5,7 +5,7 @@ FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app/backend
 
 # Копіюємо весь код у контейнер
-COPY . .
+COPY backend/ ./backend/
 
 # Виконуємо білд Spring Boot-додатку
 RUN mvn clean package -DskipTests
