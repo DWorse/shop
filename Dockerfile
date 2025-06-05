@@ -1,22 +1,26 @@
-# Стейдж 1: збірка з Maven
+# Використання офіційного образу Maven для білду
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-WORKDIR /app
-
-# Копіюємо лише backend (де лежить pom.xml і src)
-COPY backend ./backend
-
-# Переходимо в backend і збираємо jar
+# Встановлюємо робочу директорію всередині контейнера
 WORKDIR /app/backend
+
+# Копіюємо весь код у контейнер
+COPY . .
+
+# Виконуємо білд Spring Boot-додатку
 RUN mvn clean package -DskipTests
 
-# Стейдж 2: рантайм Java
+# Використання легкого OpenJDK для фінального контейнера
 FROM eclipse-temurin:17-jdk-jammy
 
-WORKDIR /app
+# Встановлюємо робочу директорію
+WORKDIR /app/backend
 
-# Копіюємо зібраний .jar з білд-стейджу
-COPY --from=build /app/backend/target/*.jar app.jar
+# Копіюємо JAR-файл із попереднього контейнера
+COPY --from=build /app/target/*.jar app.jar
 
+# Відкриваємо порт (Render автоматично визначає його)
 EXPOSE 8080
+
+# Запускаємо Spring Boot-додаток
 ENTRYPOINT ["java", "-jar", "app.jar"]
